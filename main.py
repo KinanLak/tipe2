@@ -5,15 +5,18 @@ from math import log,exp
 pop = 10000
 
 def Iab(a,b,T,n):
+    """"Génération d'une courbe d'infections en fonctions des coefficients a et b : méthode d'Euler"""
     S = pop-1
     I = [1]
+    dt = T/n
     for i in range(n-1):
-        new = min(a/T*S*I[-1], S)
-        I.append(I[-1] - b/T*I[-1] + new)
+        new = min(a*dt*S*I[-1], S)
+        I.append(I[-1] - b*dt*I[-1] + new)
         S -= new
     return I
 
 def Nk(a,b,I0,T,k=2):
+    """ 'norme k' : erreur entre la courbe générée en utilisant a,b et la courbe I0 donnée, en calculant [la somme de (l'écart en chaque point, exposant k)], exposant 1/k"""
     #print("N({},{},I0)".format(a,b))
     I = Iab(a,b,T,len(I0))
     s = 0
@@ -29,6 +32,7 @@ def Nk(a,b,I0,T,k=2):
     return s**(1/k)
 
 def Nab(I0,T,amin,amax,bmin,bmax,n,k=2):
+    """ évalue l'erreur Nk entre I0 et la courbe générée par a,b pour 50 valeurs de a, 50 valeurs de b, variant "logarithmiquement" sur amin->amax et bmin->bmax """
     mat = []
     X = []
     Y = []
@@ -54,19 +58,16 @@ def Nab(I0,T,amin,amax,bmin,bmax,n,k=2):
     return mat,X,Y
     
 def I0al(a,b,r,T):
+    """Génère la courbe d'infections en fonction de a et b, en rajoutant une erreur aléatoire entre 0 et 5% sur chaque point"""
     I = Iab(a,b,T,T)
     for i in range(T):
         I[i] += I[i]*random()*r
     return I
 
-def writearr(arr, filename):
-    f = open(filename, "w")
-    f.write("\n".join([str(v) for v in arr]))
-    f.close()
-
-def dichobof(I,amin,amax,bmin,bmax,n,p):
+def nab_iter(I,amin,amax,bmin,bmax,n,p,k=3):
+    """mesure Nab sur amin->amax, bmin->bmax, séléctionne des intervalles plus précis où les valeurs sont faible, et recalcule Nab dessus, k fois"""
     T = len(I)
-    for i in range(3):
+    for i in range(k):
         mat,X,Y = Nab(I,amin,amax,bmin,bmax,50,2)
         n = len(mat)
         m = [mat[0][0],0,0]
@@ -82,13 +83,24 @@ def dichobof(I,amin,amax,bmin,bmax,n,p):
         bmin,bmax = max(bmin,Y[x][y]-height/2), min(bmax,Y[x][y]+height/2)
     return (X[x][y],Y[x][y])
 
-"""
+def writearr(arr, filename):
+    f = open(filename, "w")
+    f.write("\n".join([str(v) for v in arr]))
+    f.close()
+
 a = 3e-3
 b = 3
 n = 360
 T = 1000
 
-#I = I0al(a,b,0.05,100)
+I1 = Iab(a,b,T,n)
+I2 = Iab(a,b,T,2*n)
+plt.plot(I2)
+plt.plot(I1)
+plt.show()
+
+"""
+#Projection de la suite de la courbe d'infectés avec T points, à partir de n<T points
 I0 = Iab(a,b,T,T)
 I = I0[:n]
 amin = 1e-3
@@ -122,18 +134,16 @@ plt.show()
 Is = []
 for i in range(10):
     a = 0.000001*i
-    Is.append(Iab(a,0.01,1000))
+    Is.append(Iab(a,0.01,T,T))
     plt.plot(Is[-1])
 plt.show()
-"""
-"""
+
 n = 50
 mat,X,Y = Nab(I,amin,amax,bmin,bmax,n,2)
 plt.figure(figsize=(n-1, n-1), dpi=90)
 plt.pcolormesh(X,Y,mat, cmap="RdYlBu")
 plt.show()
-"""
-"""
+
 I = Iab(0.00001,0.02,1000)
 plt.plot(I)
 writearr(I,"Iab.txt")
