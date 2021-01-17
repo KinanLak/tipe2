@@ -15,12 +15,22 @@ def fct(y, t, a, b):
     R,S,I = y
     return [b*I,-a*S*I,a*S*I-b*I]
 
+def random_ab(arange,brange):
+    a = arange[0] + (arange[1]-arange[0])*random()
+    b = brange[0] + (brange[1]-brange[0])*random()
+    return (a,b)
+
 def gen_dataset(arange,brange,pop,n,T,size):
     data = []
     labels = []
     for i in range(size):
         a = arange[0] + (arange[1]-arange[0])*random()
         b = brange[0] + (brange[1]-brange[0])*random()
-        data.append(odeintI(a,b,pop,n,T)[0])
+        dp = np.array(odeintI(a,b,pop,n,T)[0]).reshape(1,1000)
+        data.append(dp)
         labels.append((a,b))
-    return tf.data.Dataset.from_tensor_slices((np.array(data),np.array(labels)))
+    data = np.array(data)
+    labels = np.array(labels)
+    labels = np.squeeze(labels)
+    print(data.shape, labels.shape)
+    return tf.data.Dataset.from_tensor_slices((data,labels))

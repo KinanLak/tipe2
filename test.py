@@ -1,24 +1,29 @@
-<<<<<<< HEAD
-import tensorflow as tf
-from tensorflow import keras
-import numpy as np
+from keras_common import *
 
-model = keras.Sequential([
-    keras.layers.Dense(6),
-    keras.layers.Dense(2)
-])
-x = tf.ones((1,4))
-y = model(x)
-data = [[1,2,3,4]]
+from matplotlib import pyplot as plt
+
+
+arange = (1e-5,5e-5)
+brange = (0.01,0.5)
+size = 5
+bs = t = np.linspace(brange[0],brange[1],size)
+pop = 10000
+n = 1000
+T = 365
+
+data = []
+labels = []
+a = arange[0] + (arange[1]-arange[0])*random()
+for i in range(size):
+    b = brange[0] + (brange[1]-brange[0])*random()
+    dp = odeintI(a,b,pop,n,T)
+    data.append(dp)
+    labels.append((a,b))
 data = np.array(data)
-model(data)
-print(model.summary())
-=======
-from multiprocessing import Pool
+labels = np.array(labels)
 
-def f(x):
-    return x*x
-
-with Pool(5) as p:
-    print(p.map(f, [1, 2, 3]))
->>>>>>> d37076e8868beb34413104f699a3e048b9f8dc7a
+colors = ["red","green","blue","orange","black"]
+print(["{} : {}".format(colors[i], labels[i]) for i in range(size)])
+for i in range(size):
+    plt.plot(data[i][1], data[i][0], color=colors[i])
+plt.show()
