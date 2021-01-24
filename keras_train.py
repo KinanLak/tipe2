@@ -10,10 +10,12 @@ from tensorflow import keras
 from tensorflow.keras import layers
 
 def gen_dataset(arange,brange,pop,n,T,size):
+    """Génération d'un dataset tensorflow à partir de gen_data"""
     data,labels = gen_data(arange,brange,pop,n,T,size)
     return tf.data.Dataset.from_tensor_slices((data,labels))
 
 def gen_data(arange,brange,pop,n,T,size):
+    """Génération d'une de size courbes d'infectés, chacune à n valeurs sur une durée T, avec des coefficients dans arange et brange"""
     data = []
     labels = []
     for i in range(size):
@@ -39,7 +41,7 @@ val_ds = gen_dataset(arange,brange,pop,n,T,5) #Validation
 test_ds = gen_dataset(arange,brange,pop,n,T,5) #Test
 print("DATA READY")
 a,b = random_ab(arange,brange)
-x = np.array(odeintI(a,b,pop,n,T)[0]).reshape(1,1000)
+x = np.array(odeintI(a,b,pop,n,T)[0]).reshape(1,1000) #Pour comparer avant et après l'apprentissage
 """
 print("data.shape : ", data.shape)
 print("\n".join(["{},{}".format(*label) for label in labels]))
@@ -48,14 +50,12 @@ for dp in data[:10]:
     plt.plot(t,dp.squeeze())
 plt.show()
 """
-model = keras.Sequential([
-    layers.Dense(100,activation="sigmoid"),
-    layers.Dense(100,activation="sigmoid"),
+model = keras.Sequential([ #Définition du modèle, assez arbitraire pour l'instant
     layers.Dense(100,activation="sigmoid"),
     layers.Dense(2,activation="sigmoid")
 ])
 model.compile(optimizer="rmsprop", loss="mean_squared_error")
-model.build(input_shape=(1,1000))
+model.build(input_shape=(1,1000)) #input shape : 1 entrée à 1000 caractéristiques : une courbe d'infectés
 print("MODEL READY")
 print(model.summary())
 results1 = model.evaluate(val_ds) #Première évaluation de la performance du modèle (avant l'apprentissage)
@@ -63,7 +63,7 @@ y1 = model.predict(x)
 model.fit(train_ds,batch_size=16,epochs=5,validation_data=val_ds)
 results2 = model.evaluate(val_ds) #Deuxième évalution (après l'apprentissage)
 y2 = model.predict(x)
-print("Evaluation before training : {}".format(results1))
+print("Evaluation before training : {}".format(results1)) #Comparaison
 print("Evaluation after training : {}".format(results2))
 model.save("model") #Sauvegarde du modèle dans un fichier
 
