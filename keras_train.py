@@ -28,35 +28,51 @@ def gen_data(arange,brange,pop,n,T,size):
     labels = np.array(labels)
     labels = np.squeeze(labels)
     return (data,labels)
+    
+def make_model():
+    """Création du modèle keras"""
+    model = keras.Sequential([ #Définition du modèle, assez arbitraire pour l'instant
+    layers.Dense(100,activation="sigmoid"),
+    layers.Dense(2,activation="sigmoid")
+    ])
+    model.compile(optimizer="rmsprop", loss="mean_squared_error")
+    model.build(input_shape=(1,1000)) #input shape : 1 entrée à 1000 caractéristiques : une courbe d'infectés
+    return model
 
+def train_model(model, params = ((2e-5,5e-5),(0.05,0.1),10000,1000,365,1000)):
+    arange, brange, pop, n, T, size = params 
+    train_ds = gen_dataset(arange,brange,pop,n,T,size) #Dataset d'apprentissage
+    val_ds = gen_dataset(arange,brange,pop,n,T,5) #Validation
+    model.fit(train_ds,batch_size=16,epochs=5,validation_data=val_ds)
+    return model
+
+
+
+
+"""
+#VALEURS
 arange = (2e-5,5e-5) #Intervalle de valeurs de alpha pour la génération des courbes
 brange = (0.05,0.1) #Intervalle pour beta
 pop = 10000 #Population
 n = 1000 #nombre de points sur une courbe
 T = 365 #durée représentée sur une courbe
+"""
 
-data,labels = gen_data(arange,brange,pop,n,T,10000) #Dataset d'apprentissage
-train_ds =  tf.data.Dataset.from_tensor_slices((data,labels))
-val_ds = gen_dataset(arange,brange,pop,n,T,5) #Validation
+"""Script apparentissage complet
+#GENERATION DES DATASETS
+train_data, train_labels = gen_data(arange,brange,pop,n,T,1000) #Dataset d'apprentissage
+train_ds = tf.data.Dataset.from_tensor_slices((train_data,train_labels))
+val_data, val_labels = gen_data(arange,brange,pop,n,T,5) #Validation
+val_ds = tf.data.Dataset.from_tensor_slices((val_data,val_labels))
 test_ds = gen_dataset(arange,brange,pop,n,T,5) #Test
 print("DATA READY")
+
 a,b = random_ab(arange,brange)
 x = np.array(odeintI(a,b,pop,n,T)[0]).reshape(1,1000) #Pour comparer avant et après l'apprentissage
-"""
-print("data.shape : ", data.shape)
-print("\n".join(["{},{}".format(*label) for label in labels]))
-t = np.linspace(0,T,n)
-for dp in data[:10]:
-    plt.plot(t,dp.squeeze())
-plt.show()
-"""
-model = keras.Sequential([ #Définition du modèle, assez arbitraire pour l'instant
-    layers.Dense(100,activation="sigmoid"),
-    layers.Dense(2,activation="sigmoid")
-])
-model.compile(optimizer="rmsprop", loss="mean_squared_error")
-model.build(input_shape=(1,1000)) #input shape : 1 entrée à 1000 caractéristiques : une courbe d'infectés
-print("MODEL READY")
+
+
+
+#APPRENTISSAGE ET EVALUTAION
 print(model.summary())
 results1 = model.evaluate(val_ds) #Première évaluation de la performance du modèle (avant l'apprentissage)
 y1 = model.predict(x)
@@ -66,6 +82,5 @@ y2 = model.predict(x)
 print("Evaluation before training : {}".format(results1)) #Comparaison
 print("Evaluation after training : {}".format(results2))
 model.save("model") #Sauvegarde du modèle dans un fichier
-
 print("a = {}, b = {}, prediction1 = {}, prediction2 = {}".format(a,b,y1,y2))
-
+"""

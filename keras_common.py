@@ -21,3 +21,23 @@ def random_ab(arange,brange):
     a = arange[0] + (arange[1]-arange[0])*random()
     b = brange[0] + (brange[1]-brange[0])*random()
     return (a,b)
+
+def gen_dataset(arange,brange,pop,n,T,size):
+    """Génération d'un dataset tensorflow à partir de gen_data"""
+    data,labels = gen_data(arange,brange,pop,n,T,size)
+    return tf.data.Dataset.from_tensor_slices((data,labels))
+
+def gen_data(arange,brange,pop,n,T,size):
+    """Génération d'une de size courbes d'infectés, chacune à n valeurs sur une durée T, avec des coefficients dans arange et brange"""
+    data = []
+    labels = []
+    for i in range(size):
+        a = arange[0] + (arange[1]-arange[0])*random()
+        b = brange[0] + (brange[1]-brange[0])*random()
+        dp = np.array(odeintI(a,b,pop,n,T)[0]).reshape(1,1000)
+        data.append(dp)
+        labels.append((a,b))
+    data = np.array(data)
+    labels = np.array(labels)
+    labels = np.squeeze(labels)
+    return (data,labels)
