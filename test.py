@@ -24,14 +24,14 @@ train_data, train_labels = gen_data(arange,brange,pop,n,T,size)
 train_ds = tf.data.Dataset.from_tensor_slices((train_data,train_labels))
 val_data, val_labels = gen_data(arange,brange,pop,n,T,20)
 val_ds = tf.data.Dataset.from_tensor_slices((val_data,val_labels))
-test_data,test_labels = gen_data(arange,brange,pop,n,T,20)
+test_data,test_labels = gen_data(arange,brange,pop,n,T,32)
 arr = []
-for i in range(10):
+for i in range(5):
     model.fit(train_ds,batch_size=16,epochs=1,validation_data=val_ds)
     arr.append(get_predictions(test_data,model))
 
-"""
-fig, axs = plt.subplots(2,6)
+
+fig, axs = plt.subplots(2,6,sharey=True)
 x,y = [l[0] for l in test_labels],[l[1] for l in test_labels]
 axs[0][0].scatter(x,y)
 axs[0][0].set_title("Test data labels")
@@ -39,10 +39,13 @@ x,y = [l[0] for l in val_labels],[l[1] for l in val_labels]
 axs[1][0].scatter(x,y)
 axs[1][0].set_title("Val. data labels")
 
-for i in range(10):
+for i in range(5):
     x, y = arr[i]
     ax = axs[(i+1)//6][i%5+1]
     ax.scatter(x,y)
     ax.set_title("Epoch {}/{}".format(i+1,len(arr)))
+x,y = [l[0] for l in train_labels],[l[1] for l in train_labels]
+axs[1][1].scatter(x,y)
+axs[1][1].set_title("Train data labels")
 plt.show()
-"""
+

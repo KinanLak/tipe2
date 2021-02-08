@@ -24,7 +24,7 @@ def gen_data(arange,brange,pop,n,T,size):
         dp = np.array(odeintI(a,b,pop,n,T)[0]).reshape(1,1000)
         data.append(dp)
         labels.append((a,b))
-    data = np.array(data)
+    data = np.array(data).reshape(size,1,n,1)
     labels = np.array(labels)
     labels = np.squeeze(labels)
     return (data,labels)
@@ -32,11 +32,12 @@ def gen_data(arange,brange,pop,n,T,size):
 def make_model():
     """Création du modèle keras"""
     model = keras.Sequential([ #Définition du modèle, assez arbitraire pour l'instant
-    layers.Dense(100,activation="sigmoid"),
-    layers.Dense(2,activation="sigmoid")
+        layers.Conv1D(100,kernel_size=10,activation="sigmoid"),
+        layers.Dense(100,activation="sigmoid"),
+        layers.Dense(2,activation="sigmoid")
     ])
     model.compile(optimizer="rmsprop", loss="mean_squared_error")
-    model.build(input_shape=(1,1000)) #input shape : 1 entrée à 1000 caractéristiques : une courbe d'infectés
+    model.build(input_shape=(1,1000,1)) #input shape : 1 entrée à 1000 caractéristiques : une courbe d'infectés
     return model
 
 def train_model(model, params = ((2e-5,5e-5),(0.05,0.1),10000,1000,365,1000)):
@@ -45,9 +46,6 @@ def train_model(model, params = ((2e-5,5e-5),(0.05,0.1),10000,1000,365,1000)):
     val_ds = gen_dataset(arange,brange,pop,n,T,5) #Validation
     model.fit(train_ds,batch_size=16,epochs=5,validation_data=val_ds)
     return model
-
-
-
 
 """
 #VALEURS
