@@ -1,6 +1,7 @@
 from scipy.integrate import odeint
 from random import random
 import numpy as np
+from matplotlib import pyplot as plt
 
 def odeintI(a,b,pop,n,T):
     """Génération d'une courbe d'infectés solution du système différentiel SIR avec odeint"""
@@ -47,6 +48,49 @@ def gen_data(arange=(2e-5,5e-5)
     labels = np.array(labels)
     labels = np.squeeze(labels)
     return (data,labels)
+
+
+def preprocessing(data,labels,population=None):
+    if population == None:
+        population = pop #pop = global variable
+    if len(data) != len(labels):
+        print("len(data) != len(labels) in preprocessing")
+    p_data,p_labels = [],[] #preprocessed data and labels
+    for i in range(len(data)):
+        dp,label = data[i][0].reshape(n),labels[i]
+        mx,mxd,mxp = 0,0,0
+        for k in range(len(dp)):
+            if dp[k] >= mx:
+                mx = dp[k]
+                mxp = i
+            if k>0 and dp[k]-dp[k-1] > mxd:
+                mxd = dp[k]-dp[k-1]
+        mx = mx/population*100 #normalize max value as percent of population
+        na = (label[0]-arange[0])/(arange[1]-arange[0]) #normalize a and b using arange and brange
+        nb = (label[1]-brange[0])/(brange[1]-brange[0])
+        avg = np.average(dp)
+        p_data.append((mx,mxp,mxd,avg))
+        p_labels.append((na,nb))
+    return p_data,p_labels
+
+def show_test(net, inputs, targets):
+    predictions = net(inputs).detach().numpy().reshape(len(targets),2)
+
+    x1,y1 = [l[0] for l in targets],[l[1] for l in targets]
+    x2,y2 = [l[0] for l in predictions],[l[1] for l in predictions]
+    #print(len(x1),len(x2))
+    #print(len(y1),len(y2))
+
+    fig,(ax1,ax2) = plt.subplots(1,2)
+    ax1.axis([0,1,0,1])
+    ax1.set_title("prediction/label : a")
+    ax1.scatter(x1,x2,marker="+")
+
+    ax2.axis([0,1,0,1])
+    ax2.set_title("prediction/label : b")
+    ax2.scatter(y1,y2,marker="+")
+    plt.show()
+    return predictions
 
 #VALEURS
 arange = (2e-5,5e-5) #Intervalle de valeurs de alpha pour la génération des courbes
