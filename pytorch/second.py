@@ -56,8 +56,9 @@ def preprocessing(data,labels,population=None):
     if len(data) != len(labels):
         print("len(data) != len(labels) in preprocessing")
     p_data,p_labels = [],[] #preprocessed data and labels
-    for i in range(len(data)):
-        dp,label = data[i][0].reshape(n),labels[i]
+    arr = np.array(data).reshape(len(data),n)
+    for i in range(len(arr)):
+        dp,label = arr[i],labels[i]
         mx,mxd,mxp = 0,0,0
         for k in range(len(dp)):
             if dp[k] >= mx:

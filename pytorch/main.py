@@ -3,35 +3,9 @@ import torch.nn.functional as tnf
 import torch.nn as nn
 
 from second import *
+from net import *
 
 from matplotlib import pyplot as plt
-
-def RMSELoss(output,target):
-    return torch.sqrt(torch.mean(((output-target)/target)**2))
-
-class Net(nn.Module):
-
-    def __init__(self):
-        super(Net, self).__init__()
-        self.lin1 = nn.Linear(4,4)
-        self.lin2 = nn.Linear(4,2)
-        self.bn1 = nn.BatchNorm1d(4)
-
-        #self.lin1.weight.data.fill_(1e-9)
-        #self.lin1.weight.data.fill_(1e-9)
-
-    def forward(self, x):
-        x = self.bn1(x)
-        x = tnf.sigmoid(self.lin1(x))
-        x = self.lin2(x)
-        return x
-
-    def num_flat_feature(self,x):
-        size = x.size()[1:]
-        num_features = 1
-        for s in size:
-            num_features *= s
-        return num_features
 
 net = Net()
 
