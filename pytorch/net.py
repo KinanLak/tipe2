@@ -1,14 +1,14 @@
 import torch
-import torch.nn.functional as tnf
-import torch.nn as nn
+#import torch.nn.functional as tnf
+#import torch.nn as nn
 
-class Net(nn.Module):
+class Net(torch.nn.Module):
 
     def __init__(self):
         super(Net, self).__init__()
-        self.lin1 = nn.Linear(4,4)
-        self.lin2 = nn.Linear(4,2)
-        self.bn1 = nn.BatchNorm1d(4)
+        self.lin1 = torch.nn.Linear(4,4)
+        self.lin2 = torch.nn.Linear(4,2)
+        self.bn1 = torch.nn.BatchNorm1d(4)
 
     def forward(self, x):
         x = self.bn1(x)

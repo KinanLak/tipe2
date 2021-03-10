@@ -2,8 +2,8 @@ import torch
 import torch.nn.functional as tnf
 import torch.nn as nn
 
-from second import *
-from net import *
+from second import gen_data, preprocessing, arange, brange, pop, n, T
+from net import Net
 
 from matplotlib import pyplot as plt
 
