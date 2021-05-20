@@ -12,8 +12,8 @@ train_size = 5000
 val_size = 50
 
 #VALEURS
-arange = (2e-5,5e-5) #Intervalle de valeurs de alpha pour la génération des courbes
-brange = (0.05,0.1) #Intervalle pour beta
+arange = (1e-5,1e-4) #Intervalle de valeurs de alpha pour la génération des courbes
+brange = (0.02,0.1) #Intervalle pour beta
 pop = 10000 #Population
 n = 1000 #nombre de points sur une courbe
 T = 365 #durée représentée sur une courbe
@@ -33,7 +33,7 @@ print("Validation set ready.")
 
 criterion = torch.nn.MSELoss() #Loss function
 
-lr = 0.1
+lr = 0.2
 opt = torch.optim.SGD(net.parameters(), lr=lr)
 print("Starting training")
 for i in range(epochs):

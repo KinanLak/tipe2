@@ -74,28 +74,10 @@ def preprocessing(data,labels,population=None):
         p_labels.append((na,nb))
     return p_data,p_labels
 
-def show_test(net, inputs, targets):
-    predictions = net(inputs).detach().numpy().reshape(len(targets),2)
-
-    x1,y1 = [l[0] for l in targets],[l[1] for l in targets]
-    x2,y2 = [l[0] for l in predictions],[l[1] for l in predictions]
-    #print(len(x1),len(x2))
-    #print(len(y1),len(y2))
-
-    fig,(ax1,ax2) = plt.subplots(1,2)
-    ax1.axis([0,1,0,1])
-    ax1.set_title("prediction/label : a")
-    ax1.scatter(x1,x2,marker="+")
-
-    ax2.axis([0,1,0,1])
-    ax2.set_title("prediction/label : b")
-    ax2.scatter(y1,y2,marker="+")
-    plt.show()
-    return predictions
-
 #VALEURS
 arange = (2e-5,5e-5) #Intervalle de valeurs de alpha pour la génération des courbes
 brange = (0.05,0.1) #Intervalle pour beta
 pop = 10000 #Population
 n = 1000 #nombre de points sur une courbe
 T = 365 #durée représentée sur une courbe
+
