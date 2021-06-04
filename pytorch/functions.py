@@ -35,7 +35,7 @@ def gen_data(arange=(2e-5,5e-5)
             ,n=1000
             ,T=365
             ,size=100):
-    """Génération d'une de size courbes d'infectés, chacune à n valeurs sur une durée T, avec des coefficients dans arange et brange"""
+    """Génération d'une liste de size courbes d'infectés, chacune à n valeurs sur une durée T, avec des coefficients dans arange et brange"""
     data = []
     labels = []
     for i in range(size):
@@ -49,10 +49,8 @@ def gen_data(arange=(2e-5,5e-5)
     labels = np.squeeze(labels)
     return (data,labels)
 
-
-def preprocessing(data,labels,population=None):
-    if population == None:
-        population = pop #pop = global variable
+def preprocessing(data,labels,params):
+    arange,brange,pop,n,T = params
     if len(data) != len(labels):
         print("len(data) != len(labels) in preprocessing")
     p_data,p_labels = [],[] #preprocessed data and labels
@@ -63,10 +61,10 @@ def preprocessing(data,labels,population=None):
         for k in range(len(dp)):
             if dp[k] >= mx:
                 mx = dp[k]
-                mxp = i
+                mxp = k # <- recent change, mistake correction
             if k>0 and dp[k]-dp[k-1] > mxd:
                 mxd = dp[k]-dp[k-1]
-        mx = mx/population*100 #normalize max value as percent of population
+        mx = mx/pop*100 #normalize max value as percent of population
         na = (label[0]-arange[0])/(arange[1]-arange[0]) #normalize a and b using arange and brange
         nb = (label[1]-brange[0])/(brange[1]-brange[0])
         avg = np.average(dp)
@@ -74,10 +72,44 @@ def preprocessing(data,labels,population=None):
         p_labels.append((na,nb))
     return p_data,p_labels
 
-#VALEURS
-arange = (1e-5,4e-5) #Intervalle de valeurs de alpha pour la génération des courbes
-brange = (0.05,0.1) #Intervalle pour beta
-pop = 10000 #Population
-n = 1000 #nombre de points sur une courbe
-T = 365 #durée représentée sur une courbe
+def data_preprocessing(data,params):
+    arange,brange,pop,n,T = params
+    p_data = [] #preprocessed data and labels
+    arr = np.array(data).reshape(len(data),n)
+    for i in range(len(arr)):
+        dp = arr[i]
+        mx,mxd,mxp = 0,0,0
+        for k in range(len(dp)):
+            if dp[k] >= mx:
+                mx = dp[k]
+                mxp = k
+            if k>0 and dp[k]-dp[k-1] > mxd:
+                mxd = dp[k]-dp[k-1]
+        mx = mx/pop*100 #normalize max value as percent of population
+        avg = np.average(dp)
+        p_data.append((mx,mxp,mxd,avg))
+    return p_data
 
+def single_preprocessing(I, population):
+    mx,mxd,mxp = 0,0,0
+    for k in range(len(I)):
+        if I[k] >= mx:
+            mx = I[k]
+            mxp = k
+        if k>0 and I[k]-I[k-1] > mxd:
+            mxd = I[k]-I[k-1]
+    mx = mx/population*100 #normalize max value as percent of population
+    avg = np.average(I)
+    return (mx,mxp,mxd,avg)
+
+def get_params():
+    f = open("params.txt","r")
+    lines = f.read().split("\n")
+    f.close()
+    arr = []
+    for line in lines:
+        val = line.split("=")[1]
+        arr.append(float(val))
+    amin,amax,bmin,bmax = arr[:4]
+    pop,n,T = [int(v) for v in arr[4:]]
+    return ([amin,amax],[bmin,bmax],pop,n,T)

@@ -2,7 +2,7 @@ import torch
 import numpy as np
 
 from net import Net
-from functions import arange, brange, n, pop, T, preprocessing, gen_data, odeintI
+from functions import preprocessing, gen_data, odeintI, get_params
 
 from matplotlib import pyplot as plt
 from matplotlib import gridspec
@@ -12,15 +12,12 @@ net.load_state_dict(torch.load("model"))
 net.eval()
 
 #VALEURS
-arange = (2e-5,1e-4) #Intervalle de valeurs de alpha pour la génération des courbes
-brange = (0.05,0.1) #Intervalle pour beta
-pop = 10000 #Population
-n = 1000 #nombre de points sur une courbe
-T = 365 #durée représentée sur une courbe
+params = get_params()
+arange,brange,pop,n,T = params
 
 #TEST SET
 test_data,test_labels = gen_data(arange,brange,pop,n,T,50)
-p_test_data,p_test_labels = preprocessing(test_data,test_labels)
+p_test_data,p_test_labels = preprocessing(test_data,test_labels,params)
 inputs, targets = torch.tensor(p_test_data).float(), torch.tensor(p_test_labels).float()
 
 fig = plt.figure(figsize=(15,10))
@@ -56,14 +53,14 @@ for i in range(N):
     for j in range(N):
         b = bb[j]
         I,x = odeintI(a,b,pop,n,T)
-        p = preprocessing([I],[(a,b)])
+        p = preprocessing([I],[(a,b)],params)
         p_data,p_labels = p[0], p[1]
         inputs, targets = torch.tensor(p_data).float(), torch.tensor(p_labels).float()
         loss = criterion(net(inputs),targets)
         mat1[i].append(loss.item())
 
-ax3.pcolormesh(mat1,cmap="RdBu")
-ax3.set_title("Prediction loss (red is lower)")
+ax3.pcolormesh(mat1,cmap="RdBu_r")
+ax3.set_title("Erreur de prédiction  (bleu : plus faible)")
 ax3.set_xlabel("b")
 ax3.set_ylabel("a")
 #ax3.axis([brange[0],brange[1],arange[0],arange[1]])
