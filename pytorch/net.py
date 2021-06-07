@@ -1,6 +1,4 @@
 import torch
-#import torch.nn.functional as tnf
-#import torch.nn as nn
 
 class Net(torch.nn.Module):
 

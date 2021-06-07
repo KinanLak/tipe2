@@ -14,19 +14,12 @@ def Iab(a,b,n,T):
         S -= new
     return I
 
-def erreurab(I0,a,b,T):
-    I = Iab(a,b,len(I0),T)
-    return erreur2(I,I0)
-
 def erreur2(I1,I2):
     s = 0
     assert len(I1) == len(I2)
     for t in range(len(I1)):
         s += (I1[t]-I2[t])**2
     return sqrt(s)
-
-def randomizer(arr,r):
-    return [v*random()*r for v in arr]
 
 def naive(I0,arange,brange,T,p):
     """Essaie p*p valeurs de (a,b) dans les intervalles donnés et évalue l'erreur par rapport à I0 en chaque point"""
@@ -42,6 +35,12 @@ def naive(I0,arange,brange,T,p):
             mat[-1].append(err)
     return np.array(mat),xs,ys
 
+def randomizer(arr,r):
+    return [v*random()*r for v in arr]
+
+def erreurab(I0,a,b,T):
+    I = Iab(a,b,len(I0),T)
+    return erreur2(I,I0)
 
 n = 1000
 a = 1.5e-5
